@@ -1,6 +1,16 @@
 from django.db import models
 
 
+class Event(models.Model):
+    """
+    Event model
+    """
+    id = models.BigIntegerField(primary_key=True, unique=True)
+    type = models.ForeignKey('Type', on_delete=models.CASCADE, null=True, related_name="events")
+    actor = models.ForeignKey('Actor', on_delete=models.CASCADE, null=True, related_name='events')
+    repo = models.ForeignKey('Repo', on_delete=models.CASCADE, null=True, related_name="events")
+
+
 class Actor(models.Model):
     """
     Actor model
@@ -16,17 +26,7 @@ class Repo(models.Model):
     """
     id = models.BigIntegerField(primary_key=True, unique=True)
     name = models.CharField(max_length=200, null=True)
-    url = models.URLField(null=True)
-
-
-class Event(models.Model):
-    """
-    Event model
-    """
-    id = models.BigIntegerField(primary_key=True, unique=True)
-    type = models.ManyToManyField('Type', null=True, related_name="events")
-    actor = models.ForeignKey(Actor, on_delete=models.CASCADE, null=True, related_name='events')
-    repo = models.ForeignKey(Repo, on_delete=models.CASCADE, null=True, related_name="events")
+    url = models.URLField(null=True, unique=True)
 
 
 class Type(models.Model):
