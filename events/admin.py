@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Actor, Event, Type, Repo
+
+admin.site.register((Actor, Event, Type, Repo))

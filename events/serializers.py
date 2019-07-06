@@ -22,24 +22,38 @@ class TypeSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
+    type = TypeSerializer()
     actor = ActorSerializer()
     repo = RepoSerializer()
-    type = TypeSerializer()
 
     class Meta:
         model = Event
         fields = '__all__'
 
     def create(self, validated_data):
+        """
+        Supporting writable nested
+        serializer
+        :return: event object
+        """
         actor_data = validated_data.pop('actor')
         repo_data = validated_data.pop('repo')
         type_data = validated_data.pop('type')
         event_obj = Event.objects.create(**validated_data)
-        actor_obj = Actor.objects.get_or_create(**actor_data)
-        repo_obj = Repo.objects.get_or_create(**repo_data)
-        type_obj = Type.objects.get_or_create(**type_data)
+        actor_obj, _ = Actor.objects.get_or_create(**actor_data)
+        repo_obj, _ = Repo.objects.get_or_create(**repo_data)
+        type_obj, _ = Type.objects.get_or_create(**type_data)
         event_obj.actor = actor_obj
         event_obj.repo = repo_obj
         event_obj.type = type_obj
         event_obj.save()
         return event_obj
+
+    def to_representation(self, instance):
+        """
+        type set to type name
+        instead of type object dict
+        """
+        representation = super(EventSerializer, self).to_representation(instance)
+        representation['type'] = instance.type.name
+        return representation

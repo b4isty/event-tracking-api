@@ -1,5 +1,5 @@
 from rest_framework import permissions, status
-from rest_framework.generics import ListCreateAPIView, DestroyAPIView
+from rest_framework.generics import ListCreateAPIView, DestroyAPIView, ListAPIView
 
 from .models import Event
 from .serializers import EventSerializer
@@ -25,9 +25,8 @@ class EventListDestroyAPI(DestroyAPIView):
     def get_object(self):
         """
         Overriding to get all events
-        Django queryset is lazy so
         self.queryset.all() added
-        to queryset
+        to overcome queryset laziness
         :return all event object
         """
         return self.queryset.all()
@@ -44,3 +43,31 @@ class EventListDestroyAPI(DestroyAPIView):
         # instance = self.get_object()
         # self.perform_destroy(instance)
         # return Response(status=status.HTTP_200_OK)
+
+
+class EventLisFilterAPI(ListAPIView):
+    """
+    APIView for all filters
+    """
+    serializer_class = EventSerializer
+    permission_classes = [permissions.AllowAny, ]
+
+    def get_queryset(self):
+        """
+        :return: Filtered queryset by url kwargs
+        """
+        qs = Event.objects.all().order_by('id')
+        repo_id = self.kwargs.get("repo_id")
+        actor_id = self.kwargs.get('actor_id')
+        if repo_id:
+            qs = qs.filter(repo__id=repo_id).order_by('id')
+        if actor_id:
+            qs = qs.filter(actor__id=actor_id).order_by('id')
+        return qs
+
+    def list(self, request, *args, **kwargs):
+        response = super(EventLisFilterAPI, self).list(request, *args, **kwargs)
+        if not response.data:
+            # Changing status code if filtered queryset is blank
+            response.status_code = status.HTTP_404_NOT_FOUND
+        return response
