@@ -54,6 +54,9 @@ class EventLisFilterAPI(ListAPIView):
 
     def get_queryset(self):
         """
+        ---
+        request_serializer: EventSerializer
+        response_serializer: EventSerializer
         :return: Filtered queryset by url kwargs
         """
         qs = Event.objects.all().order_by('id')
