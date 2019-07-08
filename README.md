@@ -43,3 +43,8 @@ To run tests use this command
 ```bash
 python manage.py test
 ```
+
+Api docs
+```bash
+http://localhost:<port>/docs/
+```
